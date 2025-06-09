@@ -1,43 +1,34 @@
 import sys
-import pandas as pd
 from pathlib import Path
+sys.path.append(str(Path(__file__).resolve().parent))  # Adiciona a pasta 'scripts' ao sys.path
 
-def clean_tracks(df):
-    df = df.copy()
-    df["musica"] = df["musica"].str.strip()
-    df["artista"] = df["artista"].str.strip()
-    return df
-
-def clean_artists(df):
-    df = df.copy()
-    df["artista"] = df["artista"].str.strip()
-    df["generos"] = df["generos"].str.lower()
-    return df
-
-def clean_genres(df):
-    df = df.copy()
-    df["genero"] = df["genero"].str.lower()
-    return df
+from utils import (
+    criar_pasta,
+    ler_csv,
+    salvar_csv,
+    clean_tracks,
+    clean_artists,
+    clean_genres
+)
 
 def main(usuario):
     raw_path = Path("data/raw") / usuario
-    processed_path = Path("data/processed") / usuario
-    processed_path.mkdir(parents=True, exist_ok=True)
+    processed_path = criar_pasta(Path("data/processed") / usuario)
 
-    # Carregar arquivos com nomes corretos
-    tracks = pd.read_csv(raw_path / "top_musicas.csv")
-    artists = pd.read_csv(raw_path / "top_artistas.csv")
-    genres = pd.read_csv(raw_path / "top_generos.csv")
+    # Carrega os dados
+    tracks = ler_csv(raw_path / "top_musicas.csv")
+    artists = ler_csv(raw_path / "top_artistas.csv")
+    genres = ler_csv(raw_path / "top_generos.csv")
 
-    # Limpar dados
+    # Limpa os dados
     tracks_clean = clean_tracks(tracks)
     artists_clean = clean_artists(artists)
     genres_clean = clean_genres(genres)
 
-    # Salvar arquivos limpos
-    tracks_clean.to_csv(processed_path / "top_tracks_clean.csv", index=False, encoding="utf-8-sig")
-    artists_clean.to_csv(processed_path / "top_artists_clean.csv", index=False, encoding="utf-8-sig")
-    genres_clean.to_csv(processed_path / "top_genres_clean.csv", index=False, encoding="utf-8-sig")
+    # Salva os dados limpos
+    salvar_csv(tracks_clean, processed_path / "top_tracks_clean.csv")
+    salvar_csv(artists_clean, processed_path / "top_artists_clean.csv")
+    salvar_csv(genres_clean, processed_path / "top_genres_clean.csv")
 
     print(f"Dados limpos salvos em: {processed_path}")
 

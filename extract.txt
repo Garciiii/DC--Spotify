@@ -1,0 +1,50 @@
+1. Autenticação com a API do Spotify
+Para aceder aos dados de um utilizador (como as músicas e artistas mais ouvidos), é necessário autenticar-se junto da API do Spotify.
+
+O processo utiliza a biblioteca Spotipy, que implementa o protocolo de autorização OAuth 2.0.
+
+São usadas três variáveis de ambiente, definidas no ficheiro .env:
+
+CLIENT_ID
+
+CLIENT_SECRET
+
+REDIRECT_URI
+
+O utilizador é redirecionado para uma página onde autoriza o acesso à sua conta Spotify. Após isso, a aplicação recebe um token de acesso válido.
+
+2. Extração de Dados
+Após a autenticação, os dados são extraídos usando os seguintes métodos da API:
+
+current_user_top_tracks: obtém as músicas mais ouvidas pelo utilizador.
+
+current_user_top_artists: obtém os artistas mais ouvidos.
+
+Gêneros são extraídos a partir dos géneros associados aos artistas mais ouvidos.
+
+Os dados extraídos incluem:
+
+Para músicas: nome, artista, álbum, duração, popularidade, URI.
+
+Para artistas: nome, géneros, número de seguidores, popularidade.
+
+Para géneros: frequência de ocorrência.
+
+Estes dados são organizados em estruturas DataFrame da biblioteca pandas.
+
+3. Criação de Pasta Personalizada
+Antes de guardar os dados, o utilizador é solicitado a inserir o seu nome. Isso permite criar um diretório específico para cada perfil dentro de data/raw/nome_utilizador.
+
+Exemplo:
+Se o utilizador se chamar "Helder", os ficheiros serão guardados em:
+data/raw/Helder/
+
+4. Exportação para CSV
+Os dados são exportados para três ficheiros CSV, um para cada categoria:
+
+top_musicas.csv
+
+top_artistas.csv
+
+top_generos.csv
+

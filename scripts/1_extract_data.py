@@ -1,30 +1,35 @@
 import os
 import sys
-import pandas as pd
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
-from collections import Counter
 from pathlib import Path
 from dotenv import load_dotenv
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 
-# Carrega as variáveis do .env
-load_dotenv()
+import pandas as pd
+from collections import Counter
 
-# Configuração da API Spotify
+# Importa utilitários
+from utils import criar_pasta, salvar_csv
+
+
+# Carrega variáveis do .env
+load_dotenv(dotenv_path="secrets/.env")
+
+# Configurações do Spotify
 CLIENT_ID = os.getenv("CLIENT_ID")
 CLIENT_SECRET = os.getenv("CLIENT_SECRET")
 REDIRECT_URI = os.getenv("REDIRECT_URI")
 SCOPE = "user-top-read"
 
 def criar_pasta_usuario():
-    """Pede o nome do usuário e cria a pasta em data/raw/nome_usuario"""
+    """Solicita o nome do usuário e cria a pasta correspondente em data/raw/nome_usuario"""
     nome_usuario = input("Digite o nome do usuário para salvar os dados: ").strip()
     if not nome_usuario:
         print("Nome inválido. Saindo...")
         sys.exit(1)
 
-    pasta_raw = os.path.join("data", "raw", nome_usuario)
-    Path(pasta_raw).mkdir(parents=True, exist_ok=True)
+    pasta_raw = Path("data") / "raw" / nome_usuario
+    criar_pasta(pasta_raw)
     return pasta_raw
 
 def autenticar_spotify():
@@ -44,11 +49,11 @@ def autenticar_spotify():
         sys.exit(1)
 
 def extrair_dados(sp, limite=50):
-    """Extrai top músicas, artistas e gêneros"""
+    """Extrai dados do Spotify (top músicas, artistas, gêneros)"""
     print(f"Extraindo top {limite} músicas e artistas...")
 
-    # Extrair músicas
-    resultados_musicas = sp.current_user_top_tracks(limit=limite, time_range='medium_term')
+    # Top músicas
+    top_musicas = sp.current_user_top_tracks(limit=limite, time_range="medium_term")
     df_musicas = pd.DataFrame([{
         "musica": item["name"],
         "artista": item["artists"][0]["name"],
@@ -56,50 +61,45 @@ def extrair_dados(sp, limite=50):
         "duracao_min": round(item["duration_ms"] / 60000, 2),
         "popularidade": item["popularity"],
         "uri": item["uri"]
-    } for item in resultados_musicas["items"]])
+    } for item in top_musicas["items"]])
 
-    # Extrair artistas e gêneros
-    resultados_artistas = sp.current_user_top_artists(limit=limite, time_range='medium_term')
-    generos = []
+    # Top artistas e gêneros
+    top_artistas = sp.current_user_top_artists(limit=limite, time_range="medium_term")
     df_artistas = pd.DataFrame([{
         "artista": item["name"],
         "generos": "|".join(item["genres"]),
         "seguidores": item["followers"]["total"],
         "popularidade": item["popularity"],
         "uri": item["uri"]
-    } for item in resultados_artistas["items"]])
+    } for item in top_artistas["items"]])
 
-    # Contar gêneros
-    generos = [genero for item in resultados_artistas["items"] for genero in item["genres"]]
-    df_generos = pd.DataFrame(Counter(generos).items(), columns=["genero", "contagem"])
-    df_generos = df_generos.sort_values("contagem", ascending=False)
+    # Gêneros
+    generos = [g for item in top_artistas["items"] for g in item["genres"]]
+    df_generos = pd.DataFrame(Counter(generos).items(), columns=["genero", "contagem"]).sort_values("contagem", ascending=False)
 
     return df_musicas, df_artistas, df_generos
 
-def salvar_arquivos(df_musicas, df_artistas, df_generos, pasta_usuario):
-    """Salva os DataFrames em CSV na pasta do usuário"""
-    df_musicas.to_csv(os.path.join(pasta_usuario, "top_musicas.csv"), index=False, encoding="utf-8-sig")
-    df_artistas.to_csv(os.path.join(pasta_usuario, "top_artistas.csv"), index=False, encoding="utf-8-sig")
-    df_generos.to_csv(os.path.join(pasta_usuario, "top_generos.csv"), index=False, encoding="utf-8-sig")
-    print(f"Dados salvos em: {os.path.abspath(pasta_usuario)}")
+def salvar_arquivos(df_musicas, df_artistas, df_generos, pasta):
+    """Salva os arquivos CSV na pasta especificada"""
+    salvar_csv(df_musicas, pasta / "top_musicas.csv")
+    salvar_csv(df_artistas, pasta / "top_artistas.csv")
+    salvar_csv(df_generos, pasta / "top_generos.csv")
+    print(f"Dados salvos em: {pasta.resolve()}")
 
 def main():
-    # Pede o nome do usuário e cria a pasta
     pasta_usuario = criar_pasta_usuario()
 
-    # Verifica se o argumento (10 ou 50) foi passado
+    # Valida limite passado por argumento
     try:
         limite = int(sys.argv[1]) if len(sys.argv) > 1 else 50
         if limite not in [10, 50]:
             raise ValueError
     except ValueError:
-        print("Uso: python spotify_extract.py [10|50]")
+        print("Uso: python 1_extract_data.py [10|50]")
         sys.exit(1)
 
-    # Autentica no Spotify
+    # Autenticação e extração
     sp = autenticar_spotify()
-
-    # Extrai e salva os dados
     try:
         df_musicas, df_artistas, df_generos = extrair_dados(sp, limite)
         salvar_arquivos(df_musicas, df_artistas, df_generos, pasta_usuario)

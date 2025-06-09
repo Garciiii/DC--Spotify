@@ -1,0 +1,8 @@
+pandas
+matplotlib
+seaborn
+plotly
+spotipy
+python-dotenv
+scikit-learn
+scipy

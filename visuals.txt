@@ -1,0 +1,52 @@
+
+visuals.txt — Geração de Visualizações
+
+Este documento descreve o funcionamento do script `4_generate_visuals.py`, responsável por gerar visualizações estatísticas a partir dos dados tratados do Spotify.
+
+ Objetivo
+
+O objetivo do script é produzir gráficos estáticos e interativos que ajudam a compreender melhor os hábitos de escuta dos utilizadores ou perfis analisados, com foco em:
+
+- Músicas mais ouvidas
+- Popularidade das faixas
+- Artistas mais presentes
+- Duração média das faixas por artista
+
+ Entrada
+
+O script utiliza como fonte o ficheiro `spotify_top_tracks.csv`, gerado previamente pelo processo de tratamento e análise (`3_generate_stats.py`).
+
+Este ficheiro deve estar localizado em:
+
+../data/spotify_top_tracks.csv
+
+ Visualizações Geradas
+
+1. Top 10 Músicas por Minutos Ouvidos
+   - Gráfico de barras estático e interativo
+   - Mostra as faixas mais ouvidas em termos de tempo
+
+2. Distribuição da Popularidade
+   - Histograma estático e interativo
+   - Permite analisar se o utilizador ou perfil ouve faixas populares ou menos conhecidas
+
+3. Top 10 Artistas por Número de Faixas
+   - Quantidade de faixas que aparecem no top para cada artista
+
+4. Duração Média das Faixas por Artista (Top 5)
+   - Quais artistas têm músicas mais longas (em média)
+
+ Saída
+
+Todos os gráficos são guardados automaticamente na pasta:
+
+../reports/
+
+Inclui:
+- Ficheiros .png (imagens estáticas)
+- Ficheiros .html (versões interativas com Plotly)
+
+---------------------------------------------------------------------------------------------------------------------------------
+
+- Se o ficheiro CSV não existir, o script termina com uma mensagem de erro.
+- As bibliotecas utilizadas incluem: pandas, seaborn, matplotlib, plotly, e os.
