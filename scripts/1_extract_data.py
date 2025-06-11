@@ -13,7 +13,8 @@ from utils import criar_pasta, salvar_csv
 
 
 # Carrega variáveis do .env
-load_dotenv(dotenv_path="secrets/.env")
+BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(dotenv_path=BASE_DIR / "secrets" / ".env")
 
 # Configurações do Spotify
 CLIENT_ID = os.getenv("CLIENT_ID")
@@ -28,7 +29,7 @@ def criar_pasta_usuario():
         print("Nome inválido. Saindo...")
         sys.exit(1)
 
-    pasta_raw = Path("data") / "raw" / nome_usuario
+    pasta_raw = BASE_DIR / "data" / "raw" / nome_usuario
     criar_pasta(pasta_raw)
     return pasta_raw
 
