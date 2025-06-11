@@ -12,8 +12,10 @@ from utils import (
 )
 
 def main(usuario):
-    raw_path = Path("data/raw") / usuario
-    processed_path = criar_pasta(Path("data/processed") / usuario)
+    BASE_DIR = Path(__file__).resolve().parent.parent
+    raw_path = BASE_DIR / "data" / "raw" / usuario
+    processed_path = criar_pasta(BASE_DIR / "data" / "processed" / usuario)
+
 
     # Carrega os dados
     tracks = ler_csv(raw_path / "top_musicas.csv")
