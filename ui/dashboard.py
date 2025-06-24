@@ -1,54 +1,110 @@
-# dashboard.py
-
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 from pathlib import Path
 
-st.set_page_config(page_title="Dashboard Spotify", layout="wide")
-
-# Sidebar: selecionar usuário
-st.sidebar.title(" Dashboard Spotify")
-usuario = st.sidebar.text_input("Digite o nome do usuário:")
-
-if usuario:
-    path = Path("data/processed") / usuario
+def carregar_dados(utilizador):
+    """
+    Carrega e valida os dados do utilizador a partir de ficheiros CSV.
+    
+    Args:
+        utilizador (str): Nome do utilizador para carregar os dados
+        
+    Returns:
+        tuple: DataFrames contendo dados de músicas, artistas e géneros
+        
+    Raises:
+        FileNotFoundError: Se algum ficheiro de dados não for encontrado
+        ValueError: Se colunas obrigatórias estiverem em falta
+    """
+    caminho = Path("data/processed") / utilizador
     try:
-        df_tracks = pd.read_csv(path / "top_tracks_clean.csv")
-        df_artists = pd.read_csv(path / "top_artists_clean.csv")
-        df_genres = pd.read_csv(path / "top_genres_clean.csv")
-    except FileNotFoundError:
-        st.error("Arquivos CSV não encontrados. Certifique-se de que os dados foram processados corretamente.")
+        df_musicas = pd.read_csv(caminho / "top_tracks_clean.csv")
+        df_artistas = pd.read_csv(caminho / "top_artists_clean.csv")
+        df_generos = pd.read_csv(caminho / "top_genres_clean.csv")
+        
+        # Validar colunas obrigatórias
+        colunas_obrigatorias = {"musica", "artista", "duracao_min", "popularidade"}
+        if not colunas_obrigatorias.issubset(df_musicas.columns):
+            raise ValueError("Colunas obrigatórias em falta nos dados de músicas")
+            
+        return df_musicas, df_artistas, df_generos
+        
+    except FileNotFoundError as e:
+        st.error(f"Ficheiro de dados não encontrado: {e.filename}")
+        st.stop()
+    except ValueError as e:
+        st.error(f"Formato de dados inválido: {str(e)}")
         st.stop()
 
-    st.title(f"🎵 Análise Musical de {usuario.capitalize()}")
+def criar_grafico_barras(df, x, y, titulo, coluna_cor=None):
+    """
+    Cria um gráfico de barras horizontal padronizado.
+    
+    Args:
+        df (DataFrame): Dados para visualização
+        x (str): Nome da coluna para valores do eixo x
+        y (str): Nome da coluna para categorias do eixo y
+        titulo (str): Título do gráfico
+        coluna_cor (str, optional): Coluna para usar na escala de cores
+        
+    Returns:
+        plotly.graph_objects.Figure: Figura Plotly configurada
+    """
+    fig = px.bar(df.head(10), x=x, y=y, orientation="h",
+                 title=titulo, color=coluna_cor)
+    fig.update_layout(yaxis={'categoryorder': 'total ascending'})
+    return fig
 
-    # Estatísticas rápidas
+# Configuração da página
+st.set_page_config(page_title="Dashboard Spotify", layout="wide")
+
+# Input do utilizador na barra lateral
+st.sidebar.title("Dashboard de Dados Spotify")
+nome_utilizador = st.sidebar.text_input("Introduza o nome do utilizador:").strip()
+
+if nome_utilizador:
+    musicas, artistas, generos = carregar_dados(nome_utilizador)
+
+    st.title(f"Análise Musical para {nome_utilizador.capitalize()}")
+
+    # Métricas principais
     col1, col2, col3 = st.columns(3)
-    col1.metric("Faixas únicas", df_tracks["musica"].nunique())
-    col2.metric("Artistas únicos", df_tracks["artista"].nunique())
-    col3.metric("Duração total (min)", round(df_tracks["duracao_min"].sum(), 1))
+    col1.metric("Músicas Únicas", musicas["musica"].nunique())
+    col2.metric("Artistas Únicos", musicas["artista"].nunique())
+    col3.metric("Duração Total (min)", round(musicas["duracao_min"].sum(), 1))
 
     st.markdown("---")
 
-    # Gráfico: Top 10 músicas por popularidade
-    top_musics = df_tracks.sort_values("popularidade", ascending=False).head(10)
-    fig1 = px.bar(top_musics, x="popularidade", y="musica", orientation="h",
-                  title="Top 10 Músicas Mais Populares", color="popularidade")
-    fig1.update_layout(yaxis={'categoryorder': 'total ascending'})
-    st.plotly_chart(fig1, use_container_width=True)
+    # Gráficos
+    st.plotly_chart(
+        criar_grafico_barras(
+            musicas.sort_values("popularidade", ascending=False),
+            x="popularidade", y="musica",
+            titulo="Top 10 Músicas Mais Populares",
+            coluna_cor="popularidade"
+        ),
+        use_container_width=True
+    )
 
-    # Gráfico: Gêneros mais ouvidos
-    fig2 = px.bar(df_genres.head(10), x="contagem", y="genero", orientation="h",
-                  title="Top 10 Gêneros Mais Frequentes", color="contagem")
-    fig2.update_layout(yaxis={'categoryorder': 'total ascending'})
-    st.plotly_chart(fig2, use_container_width=True)
+    st.plotly_chart(
+        criar_grafico_barras(
+            generos.sort_values("contagem", ascending=False),
+            x="contagem", y="genero",
+            titulo="Top 10 Géneros Mais Frequentes",
+            coluna_cor="contagem"
+        ),
+        use_container_width=True
+    )
 
-    # Gráfico: Artistas mais frequentes
-    fig3 = px.bar(df_artists.head(10), x="popularidade", y="artista", orientation="h",
-                  title="Top 10 Artistas por Popularidade", color="popularidade")
-    fig3.update_layout(yaxis={'categoryorder': 'total ascending'})
-    st.plotly_chart(fig3, use_container_width=True)
-
+    st.plotly_chart(
+        criar_grafico_barras(
+            artistas.sort_values("popularidade", ascending=False),
+            x="popularidade", y="artista",
+            titulo="Top 10 Artistas por Popularidade",
+            coluna_cor="popularidade"
+        ),
+        use_container_width=True
+    )
 else:
-    st.info("Digite um nome de usuário à esquerda para visualizar os dados.")
+    st.info("Por favor, introduza um nome de utilizador na barra lateral para visualizar os dados.")
