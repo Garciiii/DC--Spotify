@@ -2,84 +2,87 @@ import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+from pathlib import Path
 import plotly.express as px
 
-# Estilo
 sns.set(style="whitegrid")
 
-# Lê os dados
-csv_path = "../data/spotify_top_tracks.csv"
-if not os.path.exists(csv_path):
-    print("O arquivo 'spotify_top_tracks.csv' não foi encontrado.")
-    exit(1)
+"""Define os diretórios base"""
+BASE_DIR = Path(__file__).resolve().parent.parent
+RAW_DIR = BASE_DIR / "data" / "raw"
+REPORTS_DIR = BASE_DIR / "reports"
+REPORTS_DIR.mkdir(parents=True, exist_ok=True)
 
-df = pd.read_csv(csv_path)
+"""Lista com (utilizador, minutos ouvidos)"""
+ranking = []
 
-# Cria pasta para relatórios
-os.makedirs("../reports", exist_ok=True)
+"""Itera sobre as pastas de cada utilizador"""
+for user_dir in RAW_DIR.iterdir():
+    if user_dir.is_dir():
+        nome = user_dir.name
+        print(f"Gerando gráficos para: {nome}")
 
-# --- Gráfico 1: Top 10 músicas por minutos ouvidos (estático e interativo)
-top_played = df.sort_values("played_minutes", ascending=False).head(10)
+        try:
+            df_musicas = pd.read_csv(user_dir / "top_musicas.csv")
+            df_artistas = pd.read_csv(user_dir / "top_artistas.csv")
+            df_generos = pd.read_csv(user_dir / "top_generos.csv")
+            stats = pd.read_csv(user_dir / "spotify_stats.csv")
+        except Exception as e:
+            print(f"Erro ao ler arquivos de {nome}: {e}")
+            continue
 
-# Estático
-plt.figure(figsize=(12, 6))
-sns.barplot(data=top_played, x="played_minutes", y="track_name", palette="mako")
-plt.title("Top 10 Músicas por Minutos Ouvidos")
-plt.xlabel("Minutos")
-plt.ylabel("Música")
-plt.tight_layout()
-plt.savefig("../reports/top10_minutos_ouvidos.png")
-plt.close()
+        """Cria pasta de relatórios para o utilizador"""
+        user_report_dir = REPORTS_DIR / nome
+        user_report_dir.mkdir(parents=True, exist_ok=True)
 
-# Interativo
-fig1 = px.bar(top_played, x="played_minutes", y="track_name", orientation="h",
-              title="Top 10 Músicas por Minutos Ouvidos (Interativo)", color="played_minutes")
-fig1.update_layout(yaxis={'categoryorder': 'total ascending'})
-fig1.write_html("../reports/top10_minutos_ouvidos_interativo.html")
+        """GRÁFICO 1: Top 10 músicas por duração"""
+        top10_musicas = df_musicas.sort_values("duracao_min", ascending=False).head(10)
+        plt.figure(figsize=(12, 6))
+        sns.barplot(data=top10_musicas, x="duracao_min", y="musica", palette="Blues_d")
+        plt.title(f"Top 10 Músicas - {nome}")
+        plt.xlabel("Duração (min)")
+        plt.tight_layout()
+        plt.savefig(user_report_dir / "top10_musicas.png")
+        plt.close()
 
-# --- Gráfico 2: Distribuição da popularidade
+        """GRÁFICO 2: Top artistas por tempo total"""
+        duracoes_artistas = df_musicas.groupby("artista")["duracao_min"].sum().sort_values(ascending=False).head(10)
+        plt.figure(figsize=(12, 6))
+        sns.barplot(x=duracoes_artistas.values, y=duracoes_artistas.index, palette="Greens_d")
+        plt.title(f"Top Artistas por Tempo - {nome}")
+        plt.xlabel("Tempo Total (min)")
+        plt.tight_layout()
+        plt.savefig(user_report_dir / "top_artistas.png")
+        plt.close()
+
+        """GRÁFICO 3: Gêneros mais frequentes"""
+        plt.figure(figsize=(12, 6))
+        sns.barplot(data=df_generos.head(10), x="contagem", y="genero", palette="Purples_d")
+        plt.title(f"Top Gêneros - {nome}")
+        plt.xlabel("Frequência")
+        plt.tight_layout()
+        plt.savefig(user_report_dir / "top_generos.png")
+        plt.close()
+
+        """Coleta estatística para o ranking"""
+        minutos_totais = stats["Total de minutos ouvidos"].iloc[0]
+        ranking.append((nome, minutos_totais))
+
+"""RANKING GERAL de todos os utilizadores"""
+ranking_df = pd.DataFrame(ranking, columns=["Utilizador", "Minutos"])
+ranking_df = ranking_df.sort_values("Minutos", ascending=False)
+
+"""Gráfico estático do ranking"""
 plt.figure(figsize=(10, 6))
-sns.histplot(df["popularity"], bins=10, kde=True, color="skyblue")
-plt.title("Distribuição da Popularidade das Faixas")
-plt.xlabel("Popularidade")
-plt.ylabel("Frequência")
+sns.barplot(data=ranking_df, x="Minutos", y="Utilizador", palette="coolwarm")
+plt.title("Ranking de Utilizadores por Minutos Ouvidos")
 plt.tight_layout()
-plt.savefig("../reports/distribuicao_popularidade.png")
+plt.savefig(REPORTS_DIR / "ranking_utilizadores.png")
 plt.close()
 
-fig2 = px.histogram(df, x="popularity", nbins=10, title="Distribuição Interativa da Popularidade")
-fig2.write_html("../reports/distribuicao_popularidade_interativa.html")
+"""Gráfico interativo com Plotly"""
+fig = px.bar(ranking_df, x="Minutos", y="Utilizador", orientation="h", title="Ranking Interativo de Utilizadores")
+fig.update_layout(yaxis={'categoryorder': 'total ascending'})
+fig.write_html(str(REPORTS_DIR / "ranking_utilizadores_interativo.html"))
 
-# --- Gráfico 3: Top 10 artistas por número de faixas
-top_artists = df["artist_name"].value_counts().head(10)
-plt.figure(figsize=(10, 6))
-sns.barplot(x=top_artists.values, y=top_artists.index, palette="viridis")
-plt.title("Top 10 Artistas por Número de Faixas")
-plt.xlabel("Quantidade de Faixas")
-plt.ylabel("Artista")
-plt.tight_layout()
-plt.savefig("../reports/top10_artistas.png")
-plt.close()
-
-fig3 = px.bar(x=top_artists.values, y=top_artists.index,
-              labels={'x': 'Quantidade de Faixas', 'y': 'Artista'},
-              title="Top 10 Artistas por Número de Faixas (Interativo)")
-fig3.write_html("../reports/top10_artistas_interativo.html")
-
-# --- Gráfico 4: Duração média por artista (Top 5)
-avg_duration = df.groupby("artist_name")["played_minutes"].mean().sort_values(ascending=False).head(5)
-plt.figure(figsize=(10, 6))
-sns.barplot(x=avg_duration.values, y=avg_duration.index, palette="rocket")
-plt.title("Duração Média das Faixas por Artista (Top 5)")
-plt.xlabel("Minutos")
-plt.ylabel("Artista")
-plt.tight_layout()
-plt.savefig("../reports/duracao_media_por_artista.png")
-plt.close()
-
-fig4 = px.bar(x=avg_duration.values, y=avg_duration.index,
-              labels={'x': 'Minutos', 'y': 'Artista'},
-              title="Duração Média por Artista (Top 5) - Interativo")
-fig4.write_html("../reports/duracao_media_por_artista_interativo.html")
-
-print("Visualizações salvas em '../reports'")
+print("Todos os gráficos foram gerados em:", REPORTS_DIR.resolve())

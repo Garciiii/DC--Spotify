@@ -1,8 +1,13 @@
-# tests/test_stat_calculations.py
-
 import pandas as pd
 
 def test_basic_statistics():
+    """
+    Testa cálculos estatísticos básicos com um conjunto de dados simulado:
+    - Soma de minutos ouvidos.
+    - Média de popularidade.
+    - Faixa mais popular.
+    - Artista mais frequente.
+    """
     # Dados simulados
     data = {
         "track_name": ["Song A", "Song B", "Song C", "Song D"],
@@ -26,11 +31,18 @@ def test_basic_statistics():
     # Testa artista mais comum
     assert df["artist_name"].value_counts().idxmax() == "Artist 1"
 
+
 def test_track_durations():
+    """
+    Testa a conversão da duração de faixas de milissegundos para minutos,
+    garantindo que o cálculo seja correto.
+    """
     data = {
         "track_name": ["A", "B"],
         "duration_ms": [180000, 240000]
     }
     df = pd.DataFrame(data)
-    durations = df["duration_ms"] / 60000  # Convertido para minutos
+
+    # Converte duração de ms para minutos
+    durations = df["duration_ms"] / 60000
     assert list(durations.round(1)) == [3.0, 4.0]
