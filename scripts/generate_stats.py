@@ -1,16 +1,18 @@
 """Este ficheiro gera as estatisticas de cada utilizador."""
-import pandas as pd
 from pathlib import Path
+import sys
+import pandas as pd
 
 nome_usuario = input("Digite o nome do utilizador para gerar estatísticas: ").strip()
 
-BASE_DIR = Path(__file__).resolve().parent.parent
-csv_path = BASE_DIR / "data" / "raw" / nome_usuario / "top_musicas.csv"
+base_dir = Path(__file__).resolve().parent.parent
+csv_path = base_dir / "data" / "raw" / nome_usuario / "top_musicas.csv"
 
 if not csv_path.exists():
     print(f"\n[Erro] O ficheiro '{csv_path}' não foi encontrado.")
-    print("Certifique-se de que já executou o script de extração e de que o nome do utilizador está correto.")
-    exit(1)
+    print("Certifique-se de que já executou o script de extração " \
+    "e de que o nome do utilizador está correto.")
+    sys.exit(1)
 
 df = pd.read_csv(csv_path)
 

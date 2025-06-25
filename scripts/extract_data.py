@@ -2,20 +2,20 @@
 import os
 import sys
 from pathlib import Path
+from collections import Counter
+
 from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
-
 import pandas as pd
-from collections import Counter
 
 from utils import criar_pasta, salvar_csv
 
 # Define a pasta base do projeto (dois níveis acima do ficheiro atual)
-BASE_DIR = Path(__file__).resolve().parent.parent
+base_dir = Path(__file__).resolve().parent.parent
 
 # Carrega variáveis de ambiente do ficheiro .env localizado em /secrets
-load_dotenv(dotenv_path=BASE_DIR / "secrets" / ".env")
+load_dotenv(dotenv_path=base_dir / "secrets" / ".env")
 
 # Lê as variáveis do .env necessárias para a autenticação com o Spotify
 CLIENT_ID = os.getenv("CLIENT_ID")
@@ -33,7 +33,7 @@ def criar_pasta_usuario():
         print("Nome inválido. Saindo...")
         sys.exit(1)
 
-    pasta_raw = BASE_DIR / "data" / "raw" / nome_usuario
+    pasta_raw = base_dir / "data" / "raw" / nome_usuario
     criar_pasta(pasta_raw)
     return pasta_raw
 
@@ -55,8 +55,8 @@ def autenticar_spotify():
         print("Autenticação com Spotify realizada com sucesso")
         return sp
     except Exception as e:
-        print(f"Falha na autenticação: {e}")
-        sys.exit(1)
+        print(f"Erro: {e}")
+        raise
 
 def extrair_dados(sp, limite=50):
     """
@@ -125,7 +125,8 @@ def main():
         df_musicas, df_artistas, df_generos = extrair_dados(sp, limite)
         salvar_arquivos(df_musicas, df_artistas, df_generos, pasta_usuario)
     except Exception as e:
-        print(f"Erro durante a extração: {e}")
+        print(f"Erro: {e}")
+        raise
 
 if __name__ == "__main__":
     main()

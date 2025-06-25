@@ -1,7 +1,8 @@
+"""Interface do dashboard para visualização dos dados do usuário."""
+from pathlib import Path
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from pathlib import Path
 
 def carregar_dados(utilizador):
     """
@@ -22,14 +23,11 @@ def carregar_dados(utilizador):
         df_musicas = pd.read_csv(caminho / "top_tracks_clean.csv")
         df_artistas = pd.read_csv(caminho / "top_artists_clean.csv")
         df_generos = pd.read_csv(caminho / "top_genres_clean.csv")
-        
         # Validar colunas obrigatórias
         colunas_obrigatorias = {"musica", "artista", "duracao_min", "popularidade"}
         if not colunas_obrigatorias.issubset(df_musicas.columns):
             raise ValueError("Colunas obrigatórias em falta nos dados de músicas")
-            
         return df_musicas, df_artistas, df_generos
-        
     except FileNotFoundError as e:
         st.error(f"Ficheiro de dados não encontrado: {e.filename}")
         st.stop()
@@ -46,8 +44,7 @@ def criar_grafico_barras(df, x, y, titulo, coluna_cor=None):
         x (str): Nome da coluna para valores do eixo x
         y (str): Nome da coluna para categorias do eixo y
         titulo (str): Título do gráfico
-        coluna_cor (str, optional): Coluna para usar na escala de cores
-        
+        coluna_cor (str, optional): Coluna para usar na escala de cores 
     Returns:
         plotly.graph_objects.Figure: Figura Plotly configurada
     """

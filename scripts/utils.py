@@ -1,6 +1,7 @@
+"""Funções utilitárias para manipulação de arquivos e dados."""
 import os
-import pandas as pd
 from pathlib import Path
+import pandas as pd
 
 def criar_pasta(pasta_path):
     """Cria uma pasta se ela não existir"""

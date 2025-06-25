@@ -2,8 +2,6 @@
 import sys
 from pathlib import Path
 
-sys.path.append(str(Path(__file__).resolve().parent))
-
 from utils import (
     criar_pasta,
     ler_csv,
@@ -13,6 +11,9 @@ from utils import (
     clean_genres
 )
 
+sys.path.append(str(Path(__file__).resolve().parent))
+
+
 def main(usuario):
     """
     Limpa os dados brutos de um utilizador e salva os resultados processados.
@@ -20,9 +21,9 @@ def main(usuario):
     Parâmetros:
         usuario (str): Nome do utilizador cuja pasta de dados será processada.
     """
-    BASE_DIR = Path(__file__).resolve().parent.parent
-    raw_path = BASE_DIR / "data" / "raw" / usuario
-    processed_path = criar_pasta(BASE_DIR / "data" / "processed" / usuario)
+    base_dir = Path(__file__).resolve().parent.parent
+    raw_path = base_dir / "data" / "raw" / usuario
+    processed_path = criar_pasta(base_dir / "data" / "processed" / usuario)
 
     tracks = ler_csv(raw_path / "top_musicas.csv")
     artists = ler_csv(raw_path / "top_artistas.csv")

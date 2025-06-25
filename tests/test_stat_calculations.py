@@ -1,3 +1,4 @@
+"""Testes para cálculo de estatísticas."""
 import pandas as pd
 
 def test_basic_statistics():
