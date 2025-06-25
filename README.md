@@ -7,20 +7,20 @@ O sistema permite:
     * extrair  
     * Processo de Extração - Ler documento `extract.txt`
     ```bash
-    python scripts/1_extract_data.py
+    python scripts/extract_data.py
     ```
     * limpar  
     ```bash
-    python scripts/2_clean_data.py
+    python scripts/clean_data.py
     ```
     * analisar e visualizar os dados  
     ```bash
-    python scripts/3_generate_stats.py
+    python scripts/generate_stats.py
     ```
     * gerar visualizações dos dados  
     * Processo de Geração de Visualizações - Ler documento `visuals.txt`
     ```bash
-    python scripts/4_generate_visuals.py
+    python scripts/generate_visuals.py
     ```
 
         * conceito  
