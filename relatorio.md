@@ -1,10 +1,10 @@
 # Projeto Final – DC-Spotify 🎧
 
 ## Curso: Licenciatura em Engenharia Informática  
-## Unidade Curricular: Projeto de Integração Vertical (PIV)  
+## Unidade Curricular: Programação 4 (PIV)  
 ## Ano letivo: 2024/2025  
-## Grupo: [Nome do Aluno 1], [Nome do Aluno 2]  
-## Docente: Miguel Rodrigues  
+## Grupo: Helder Garcia, Diogo Santos  
+## Docente: Prof.Miguel Rodrigues  
 
 ---
 
