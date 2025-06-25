@@ -1,3 +1,4 @@
+"""Este ficheiro gera as estatisticas de cada utilizador."""
 import pandas as pd
 from pathlib import Path
 

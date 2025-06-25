@@ -1,3 +1,4 @@
+"""Este ficheiro trata limpeza de dados do Spotify de cada utilizador."""
 import sys
 from pathlib import Path
 

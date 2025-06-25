@@ -1,3 +1,4 @@
+"""Este ficheiro gera graficos com as estatisticas de cada utilizador e um geral."""
 import os
 import pandas as pd
 import matplotlib.pyplot as plt

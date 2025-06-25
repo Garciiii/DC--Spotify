@@ -1,3 +1,4 @@
+"""Este ficheiro trata da extração de dados do Spotify."""
 import os
 import sys
 from pathlib import Path
