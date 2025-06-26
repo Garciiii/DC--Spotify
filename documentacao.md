@@ -139,8 +139,15 @@ del .coverage
 ```
 
 ---
+## 12. Fazer Push no GITHUB
 
-## 12. Instruções Finais
+```bash
+git add "nome do ficheiro"
+git commit -m "descrição do push"
+git push
+```
+
+## 13. Instruções Finais
 
 - Os relatórios HTML de testes estarão na pasta `htmlcov`
 - A cache dos testes é guardada em `.pytest_cache`
