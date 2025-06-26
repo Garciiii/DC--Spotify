@@ -19,17 +19,17 @@ A aplicação tem como finalidade explorar os hábitos de escuta dos utilizadore
 
 A aplicação está organizada em várias fases:
 
-1. **Extração de Dados (`scripts/1_extract_data.py`)**  
+1. **Extração de Dados (`scripts/extract_data.py`)**  
    - Ligação à API do Spotify ou leitura de ficheiros `.csv`.
    - Simulação de uma base de dados com informações de faixas, artistas e géneros.
 
-2. **Limpeza e Preparação (`scripts/2_clean_data.py`)**  
+2. **Limpeza e Preparação (`scripts/clean_data.py`)**  
    - Tratamento de dados em falta, normalização de formatos e estruturação da informação.
 
-3. **Geração de Estatísticas (`scripts/3_generate_stats.py`)**  
+3. **Geração de Estatísticas (`scripts/generate_stats.py`)**  
    - Cálculo de totais, médias e rankings com base em artistas, géneros, popularidade, etc.
 
-4. **Visualização de Dados (`scripts/4_generate_visuals.py`)**  
+4. **Visualização de Dados (`scripts/generate_visuals.py`)**  
    - Criação de gráficos com `matplotlib` e `seaborn`.
    - Exportação em `.json`, `.csv`, `.xlsx` e imagens.
 
