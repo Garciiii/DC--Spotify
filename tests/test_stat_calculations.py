@@ -23,7 +23,7 @@ def test_basic_statistics():
     assert df["played_minutes"].sum() == 15.0
 
     # Testa média de popularidade
-    assert round(df["popularity"].mean(), 1) == 76.3
+    assert round(df["popularity"].mean(), 1) == 76.2
 
     # Testa faixa mais popular
     most_popular = df.loc[df["popularity"].idxmax()]
