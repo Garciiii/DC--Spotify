@@ -1,0 +1,9 @@
+[
+  "tests/test_data_quality.py::test_artists_columns",
+  "tests/test_data_quality.py::test_genres_columns",
+  "tests/test_data_quality.py::test_no_nulls",
+  "tests/test_data_quality.py::test_positive_values",
+  "tests/test_data_quality.py::test_tracks_columns",
+  "tests/test_stat_calculations.py::test_basic_statistics",
+  "tests/test_stat_calculations.py::test_track_durations"
+]
