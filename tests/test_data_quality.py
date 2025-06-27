@@ -67,4 +67,3 @@ def test_positive_values(df_tracks, df_artists, df_genres):
     assert (df_artists["seguidores"] >= 0).all()
     assert (df_artists["popularidade"] >= 0).all()
     assert (df_genres["contagem"] > 0).all()
-
